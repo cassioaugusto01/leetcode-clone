@@ -2,18 +2,13 @@ import json
 import sys
 import traceback
 from io import StringIO
-import signal
 import time
+import platform
 
 
 class TimeoutException(Exception):
     """Exceção para timeout de execução"""
     pass
-
-
-def timeout_handler(signum, frame):
-    """Handler para timeout"""
-    raise TimeoutException("Tempo limite de execução excedido")
 
 
 def execute_code(code, test_cases, function_name='solution'):
@@ -37,10 +32,6 @@ def execute_code(code, test_cases, function_name='solution'):
     
     start_time = time.time()
     
-    # Configurar timeout de 5 segundos
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(5)
-    
     try:
         # Criar namespace isolado para execução
         namespace = {}
@@ -55,6 +46,7 @@ def execute_code(code, test_cases, function_name='solution'):
             
             # Verificar se a função existe
             if function_name not in namespace:
+                sys.stdout = old_stdout
                 return {
                     'status': 'runtime_error',
                     'message': f'Função "{function_name}" não encontrada no código',
@@ -116,23 +108,14 @@ def execute_code(code, test_cases, function_name='solution'):
         finally:
             # Restaurar stdout
             sys.stdout = old_stdout
-            # Cancelar timeout
-            signal.alarm(0)
-    
-    except TimeoutException:
-        results['status'] = 'time_limit'
-        results['message'] = 'Tempo limite de execução excedido (5 segundos)'
-        signal.alarm(0)
     
     except SyntaxError as e:
         results['status'] = 'runtime_error'
         results['message'] = f'Erro de sintaxe: {str(e)}'
-        signal.alarm(0)
     
     except Exception as e:
         results['status'] = 'runtime_error'
         results['message'] = f'Erro durante execução: {str(e)}\n{traceback.format_exc()}'
-        signal.alarm(0)
     
     end_time = time.time()
     results['execution_time'] = round(end_time - start_time, 3)
