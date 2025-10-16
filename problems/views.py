@@ -125,7 +125,12 @@ def problem_detail(request, slug):
             problem=problem
         ).order_by('-submitted_at')[:5]
         
-        user_solved = user_submissions.filter(status='accepted').exists()
+        # Verificar se já resolveu (query separada, antes do slice)
+        user_solved = Submission.objects.filter(
+            user=request.user,
+            problem=problem,
+            status='accepted'
+        ).exists()
     
     form = CodeSubmissionForm(initial={'code': problem.starter_code})
     
