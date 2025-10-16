@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle" style="font-size: 5rem; color: var(--primary-color);"></i>
+                    </div>
+                    <h3>{{ user.username }}</h3>
+                    {% if user.first_name or user.last_name %}
+                    <p class="text-muted">{{ user.first_name }} {{ user.last_name }}</p>
+                    {% endif %}
+                    {% if user.email %}
+                    <p class="text-muted"><i class="bi bi-envelope"></i> {{ user.email }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Estatísticas</h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-check-circle text-success"></i> Desafios Resolvidos</span>
+                            <strong>{{ profile.problems_solved }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-file-code text-primary"></i> Total de Submissões</span>
+                            <strong>{{ profile.total_submissions }}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar text-info"></i> Membro desde</span>
+                            <strong>{{ user.date_joined|date:"d/m/Y" }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Desafios Resolvidos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Desafios Resolvidos</h5>
+                </div>
+                <div class="card-body">
+                    {% if solved_problems %}
+                    <div class="list-group">
+                        {% for problem in solved_problems %}
+                        <a href="{% url 'problem_detail' problem.slug %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    <strong>{{ problem.title }}</strong>
+                                </div>
+                                <span class="difficulty-badge difficulty-{{ problem.difficulty }}">
+                                    {{ problem.get_difficulty_display }}
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Você ainda não resolveu nenhum desafio.</p>
+                    <a href="{% url 'problem_list' %}" class="btn btn-primary mt-3">
+                        Ver Desafios
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Submissões Recentes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Submissões Recentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_submissions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Desafio</th>
+                                    <th>Status</th>
+                                    <th>Data</th>
+                                    <th>Tempo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for submission in recent_submissions %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'problem_detail' submission.problem.slug %}">
+                                            {{ submission.problem.title }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="status-{{ submission.status }}">
+                                            {{ submission.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ submission.submitted_at|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if submission.execution_time %}
+                                            {{ submission.execution_time }}s
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Você ainda não fez nenhuma submissão.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ problem.title }} - CodePlatform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .split-view {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        min-height: 600px;
+    }
+    
+    @media (max-width: 992px) {
+        .split-view {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .problem-description {
+        overflow-y: auto;
+        max-height: 800px;
+    }
+    
+    .code-section {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    #code-editor {
+        flex: 1;
+        min-height: 400px;
+    }
+    
+    .test-result {
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .test-result.passed {
+        background-color: #d4edda;
+        border-left: 4px solid #28a745;
+    }
+    
+    .test-result.failed {
+        background-color: #f8d7da;
+        border-left: 4px solid #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-3">
+        <a href="{% url 'problem_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+    
+    <div class="split-view">
+        <!-- Descrição do Desafio -->
+        <div class="problem-description">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h2>{{ problem.title }}</h2>
+                        <span class="difficulty-badge difficulty-{{ problem.difficulty }}">
+                            {{ problem.get_difficulty_display }}
+                        </span>
+                    </div>
+                    
+                    {% if user_solved %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> Você já resolveu este desafio!
+                    </div>
+                    {% endif %}
+                    
+                    <h5>Descrição</h5>
+                    <div class="mb-4">
+                        {{ problem.description|linebreaks }}
+                    </div>
+                    
+                    {% if sample_test_cases %}
+                    <h5>Exemplos</h5>
+                    {% for test_case in sample_test_cases %}
+                    <div class="card mb-3 bg-light">
+                        <div class="card-body">
+                            <h6>Exemplo {{ forloop.counter }}</h6>
+                            {% if test_case.description %}
+                            <p class="mb-2"><strong>{{ test_case.description }}</strong></p>
+                            {% endif %}
+                            <p class="mb-1"><strong>Entrada:</strong> <code>{{ test_case.input_data }}</code></p>
+                            <p class="mb-0"><strong>Saída Esperada:</strong> <code>{{ test_case.expected_output }}</code></p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if user_submissions %}
+                    <h5 class="mt-4">Suas Submissões Recentes</h5>
+                    <div class="list-group">
+                        {% for submission in user_submissions %}
+                        <a href="{% url 'submission_detail' submission.id %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="status-{{ submission.status }}">
+                                    <i class="bi bi-circle-fill"></i> {{ submission.get_status_display }}
+                                </span>
+                                <small class="text-muted">{{ submission.submitted_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Editor de Código -->
+        <div class="code-section">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="mb-3">Seu Código</h5>
+                    
+                    {% if not user.is_authenticated %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Você precisa <a href="{% url 'login' %}">fazer login</a> para submeter código.
+                    </div>
+                    {% endif %}
+                    
+                    <form id="code-form" class="flex-fill d-flex flex-column">
+                        {% csrf_token %}
+                        {{ form.code }}
+                        
+                        <div class="mt-3">
+                            {% if user.is_authenticated %}
+                            <button type="button" id="run-btn" class="btn btn-outline-primary">
+                                <i class="bi bi-play-fill"></i> Executar Testes
+                            </button>
+                            <button type="button" id="submit-btn" class="btn btn-success">
+                                <i class="bi bi-check-lg"></i> Submeter
+                            </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                    
+                    <div id="results" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const runBtn = document.getElementById('run-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const resultsDiv = document.getElementById('results');
+    const codeTextarea = document.getElementById('id_code');
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function showLoading() {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-info">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Executando código...
+            </div>
+        `;
+    }
+    
+    function showResults(data, isSubmission = false) {
+        let html = '';
+        
+        if (data.error) {
+            html = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> ${data.error}</div>`;
+        } else {
+            const statusClass = data.status === 'accepted' ? 'success' : 'danger';
+            html = `
+                <div class="alert alert-${statusClass}">
+                    <strong>${data.message}</strong>
+                    ${data.execution_time ? `<br><small>Tempo de execução: ${data.execution_time}s</small>` : ''}
+                </div>
+            `;
+            
+            if (data.test_results && data.test_results.length > 0) {
+                html += '<div class="mt-3"><strong>Resultados dos Testes:</strong></div>';
+                data.test_results.forEach(test => {
+                    const testClass = test.passed ? 'passed' : 'failed';
+                    const icon = test.passed ? 'check-circle-fill' : 'x-circle-fill';
+                    html += `
+                        <div class="test-result ${testClass}">
+                            <div><i class="bi bi-${icon}"></i> <strong>Teste ${test.test_number}</strong></div>
+                            <div><small>Entrada: <code>${JSON.stringify(test.input)}</code></small></div>
+                            ${test.expected !== null ? `<div><small>Esperado: <code>${JSON.stringify(test.expected)}</code></small></div>` : ''}
+                            ${test.actual !== null ? `<div><small>Resultado: <code>${JSON.stringify(test.actual)}</code></small></div>` : ''}
+                            ${test.error ? `<div class="text-danger"><small>Erro: ${test.error}</small></div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            if (isSubmission && data.status === 'accepted') {
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        }
+        
+        resultsDiv.innerHTML = html;
+    }
+    
+    if (runBtn) {
+        runBtn.addEventListener('click', async () => {
+            const code = codeTextarea.value;
+            showLoading();
+            runBtn.disabled = true;
+            
+            try {
+                const response = await fetch('{% url "run_code" problem.slug %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ code })
+                });
+                
+                const data = await response.json();
+                showResults(data);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Erro ao executar código</div>`;
+            } finally {
+                runBtn.disabled = false;
+            }
+        });
+    }
+    
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async () => {
+            if (!confirm('Tem certeza que deseja submeter sua solução?')) {
+                return;
+            }
+            
+            const code = codeTextarea.value;
+            showLoading();
+            submitBtn.disabled = true;
+            runBtn.disabled = true;
+            
+            try {
+                const response = await fetch('{% url "submit_code" problem.slug %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ code })
+                });
+                
+                const data = await response.json();
+                showResults(data, true);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Erro ao submeter código</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                runBtn.disabled = false;
+            }
+        });
+    }
+</script>
+{% endblock %}
+

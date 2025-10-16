@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - CodePlatform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-3 fw-bold mb-4">Bem-vindo ao CodePlatform</h1>
+        <p class="lead mb-4">Pratique suas habilidades de programação com desafios de algoritmos</p>
+        <div class="d-flex gap-3 justify-content-center">
+            {% if user.is_authenticated %}
+                <a href="{% url 'problem_list' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-list-ul"></i> Ver Desafios
+                </a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-person-plus"></i> Começar Agora
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <i class="bi bi-puzzle"></i>
+                <h3>{{ problems_count }}</h3>
+                <p class="text-muted mb-0">Desafios Disponíveis</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <i class="bi bi-people"></i>
+                <h3>{{ users_count }}</h3>
+                <p class="text-muted mb-0">Usuários Registrados</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <i class="bi bi-check-circle"></i>
+                <h3>{{ submissions_count }}</h3>
+                <p class="text-muted mb-0">Submissões Totais</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Problems -->
+{% if recent_problems %}
+<div class="container mb-5">
+    <h2 class="mb-4">Desafios Recentes</h2>
+    <div class="row g-4">
+        {% for problem in recent_problems %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ problem.title }}</h5>
+                        <span class="difficulty-badge difficulty-{{ problem.difficulty }}">
+                            {{ problem.get_difficulty_display }}
+                        </span>
+                    </div>
+                    <p class="card-text text-muted">
+                        {{ problem.description|truncatewords:20 }}
+                    </p>
+                    <a href="{% url 'problem_detail' problem.slug %}" class="btn btn-primary">
+                        Resolver <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        <i class="bi bi-check-circle"></i> {{ problem.get_solved_count }} resolvido(s)
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'problem_list' %}" class="btn btn-outline-primary btn-lg">
+            Ver Todos os Desafios <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">Recursos da Plataforma</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-code-square" style="font-size: 3rem; color: var(--primary-color);"></i>
+                <h5 class="mt-3">Editor de Código</h5>
+                <p class="text-muted">Escreva e teste seu código Python diretamente no navegador</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-check2-square" style="font-size: 3rem; color: var(--secondary-color);"></i>
+                <h5 class="mt-3">Testes Automáticos</h5>
+                <p class="text-muted">Execute testes unitários para validar sua solução</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-graph-up" style="font-size: 3rem; color: var(--warning-color);"></i>
+                <h5 class="mt-3">Acompanhe Progresso</h5>
+                <p class="text-muted">Veja seu histórico de submissões e problemas resolvidos</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-trophy" style="font-size: 3rem; color: var(--danger-color);"></i>
+                <h5 class="mt-3">Desafios Diversos</h5>
+                <p class="text-muted">Desafios de fácil a difícil para todos os níveis</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

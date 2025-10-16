@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Desafios - CodePlatform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-list-ul"></i> Desafios</h1>
+    </div>
+    
+    <!-- Filtros e Busca -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="search" 
+                           placeholder="Buscar desafios..." 
+                           value="{{ search_query|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="difficulty">
+                        <option value="">Todas as dificuldades</option>
+                        <option value="easy" {% if current_difficulty == 'easy' %}selected{% endif %}>Fácil</option>
+                        <option value="medium" {% if current_difficulty == 'medium' %}selected{% endif %}>Médio</option>
+                        <option value="hard" {% if current_difficulty == 'hard' %}selected{% endif %}>Difícil</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Lista de Problemas -->
+    {% if problems %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">Status</th>
+                        <th>Título</th>
+                        <th style="width: 120px;">Dificuldade</th>
+                        <th style="width: 150px;">Resolvido por</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for problem in problems %}
+                    <tr>
+                        <td class="text-center">
+                            {% if problem.id in solved_problems %}
+                                <i class="bi bi-check-circle-fill text-success" title="Resolvido"></i>
+                            {% else %}
+                                <i class="bi bi-circle text-muted" title="Não resolvido"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'problem_detail' problem.slug %}" class="text-decoration-none">
+                                <strong>{{ problem.title }}</strong>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="difficulty-badge difficulty-{{ problem.difficulty }}">
+                                {{ problem.get_difficulty_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <i class="bi bi-people"></i> {{ problem.get_solved_count }} usuário(s)
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Nenhum desafio encontrado.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
