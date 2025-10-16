@@ -49,3 +49,11 @@ Thumbs.db
 /staticfiles/
 /static_collected/
 
+# Coverage
+.coverage
+htmlcov/
+.coverage.*
+
+# Pre-commit
+.pre-commit-config.yaml.bak
+
