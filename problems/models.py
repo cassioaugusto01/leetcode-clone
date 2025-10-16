@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 
-class Problem(models.Model):
+class Challenge(models.Model):
     """Modelo para representar um desafio de programação"""
     DIFFICULTY_CHOICES = [
         ('easy', 'Fácil'),
@@ -40,6 +40,7 @@ class Problem(models.Model):
         verbose_name = 'Desafio'
         verbose_name_plural = 'Desafios'
         ordering = ['-created_at']
+        db_table = 'problems_problem'  # Manter tabela existente
     
     def __str__(self):
         return self.title
@@ -47,18 +48,23 @@ class Problem(models.Model):
     def get_solved_count(self):
         """Retorna o número de usuários que resolveram este desafio"""
         return Submission.objects.filter(
-            problem=self, 
+            challenge=self, 
             status='accepted'
         ).values('user').distinct().count()
 
 
+# Manter alias Problem para compatibilidade
+Problem = Challenge
+
+
 class TestCase(models.Model):
     """Modelo para representar casos de teste de um desafio"""
-    problem = models.ForeignKey(
-        Problem, 
+    challenge = models.ForeignKey(
+        Challenge, 
         on_delete=models.CASCADE, 
         related_name='test_cases',
-        verbose_name='Desafio'
+        verbose_name='Desafio',
+        db_column='problem_id'  # Manter coluna existente
     )
     input_data = models.TextField(verbose_name='Entrada (JSON)')
     expected_output = models.TextField(verbose_name='Saída Esperada (JSON)')
@@ -76,9 +82,15 @@ class TestCase(models.Model):
         verbose_name = 'Caso de Teste'
         verbose_name_plural = 'Casos de Teste'
         ordering = ['id']
+        db_table = 'problems_testcase'  # Manter tabela existente
     
     def __str__(self):
-        return f"{self.problem.title} - Test {self.id}"
+        return f"{self.challenge.title} - Test {self.id}"
+    
+    # Propriedade para compatibilidade
+    @property
+    def problem(self):
+        return self.challenge
 
 
 class Submission(models.Model):
@@ -97,10 +109,11 @@ class Submission(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Usuário'
     )
-    problem = models.ForeignKey(
-        Problem, 
+    challenge = models.ForeignKey(
+        Challenge, 
         on_delete=models.CASCADE,
-        verbose_name='Desafio'
+        verbose_name='Desafio',
+        db_column='problem_id'  # Manter coluna existente
     )
     code = models.TextField(verbose_name='Código')
     status = models.CharField(
@@ -127,9 +140,15 @@ class Submission(models.Model):
         verbose_name = 'Submissão'
         verbose_name_plural = 'Submissões'
         ordering = ['-submitted_at']
+        db_table = 'problems_submission'  # Manter tabela existente
     
     def __str__(self):
-        return f"{self.user.username} - {self.problem.title} - {self.status}"
+        return f"{self.user.username} - {self.challenge.title} - {self.status}"
+    
+    # Propriedade para compatibilidade
+    @property
+    def problem(self):
+        return self.challenge
 
 
 class UserProfile(models.Model):
@@ -139,9 +158,10 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Usuário'
     )
-    problems_solved = models.IntegerField(
+    challenges_solved = models.IntegerField(
         default=0,
-        verbose_name='Desafios Resolvidos'
+        verbose_name='Desafios Resolvidos',
+        db_column='problems_solved'  # Manter coluna existente
     )
     total_submissions = models.IntegerField(
         default=0,
@@ -151,7 +171,17 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = 'Perfil de Usuário'
         verbose_name_plural = 'Perfis de Usuário'
+        db_table = 'problems_userprofile'  # Manter tabela existente
     
     def __str__(self):
         return f"Perfil de {self.user.username}"
+    
+    # Propriedade para compatibilidade
+    @property
+    def problems_solved(self):
+        return self.challenges_solved
+    
+    @problems_solved.setter
+    def problems_solved(self, value):
+        self.challenges_solved = value
 

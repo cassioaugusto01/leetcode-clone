@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <div class="mb-3">
-        <a href="{% url 'problem_detail' submission.problem.slug %}" class="btn btn-outline-secondary">
+        <a href="{% url 'challenge_detail' submission.problem.slug %}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Voltar ao Desafio
         </a>
         <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
@@ -21,7 +21,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <p><strong>Desafio:</strong> 
-                        <a href="{% url 'problem_detail' submission.problem.slug %}">
+                        <a href="{% url 'challenge_detail' submission.problem.slug %}">
                             {{ submission.problem.title }}
                         </a>
                     </p>

@@ -1,16 +1,16 @@
 from django.contrib import admin
-from .models import Problem, TestCase, Submission, UserProfile
+from .models import Challenge, TestCase, Submission, UserProfile
 
 
 class TestCaseInline(admin.TabularInline):
-    """Inline para adicionar casos de teste diretamente na página do problema"""
+    """Inline para adicionar casos de teste diretamente na página do desafio"""
     model = TestCase
     extra = 1
     fields = ['input_data', 'expected_output', 'is_sample', 'description']
 
 
-@admin.register(Problem)
-class ProblemAdmin(admin.ModelAdmin):
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
     """Admin para gerenciar desafios"""
     list_display = ['title', 'difficulty', 'created_at', 'get_solved_count']
     list_filter = ['difficulty', 'created_at']
@@ -31,17 +31,17 @@ class ProblemAdmin(admin.ModelAdmin):
 @admin.register(TestCase)
 class TestCaseAdmin(admin.ModelAdmin):
     """Admin para gerenciar casos de teste"""
-    list_display = ['problem', 'is_sample', 'description']
-    list_filter = ['is_sample', 'problem']
-    search_fields = ['problem__title', 'description']
+    list_display = ['challenge', 'is_sample', 'description']
+    list_filter = ['is_sample', 'challenge']
+    search_fields = ['challenge__title', 'description']
 
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
     """Admin para visualizar submissões"""
-    list_display = ['user', 'problem', 'status', 'submitted_at', 'execution_time']
-    list_filter = ['status', 'submitted_at', 'problem']
-    search_fields = ['user__username', 'problem__title']
+    list_display = ['user', 'challenge', 'status', 'submitted_at', 'execution_time']
+    list_filter = ['status', 'submitted_at', 'challenge']
+    search_fields = ['user__username', 'challenge__title']
     readonly_fields = ['submitted_at', 'execution_time']
     
     def has_add_permission(self, request):
@@ -52,7 +52,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Admin para visualizar perfis de usuário"""
-    list_display = ['user', 'problems_solved', 'total_submissions']
+    list_display = ['user', 'challenges_solved', 'total_submissions']
     search_fields = ['user__username']
-    readonly_fields = ['problems_solved', 'total_submissions']
+    readonly_fields = ['challenges_solved', 'total_submissions']
 

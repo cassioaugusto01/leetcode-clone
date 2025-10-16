@@ -56,7 +56,7 @@
                     {% if solved_problems %}
                     <div class="list-group">
                         {% for problem in solved_problems %}
-                        <a href="{% url 'problem_detail' problem.slug %}" 
+                        <a href="{% url 'challenge_detail' problem.slug %}" 
                            class="list-group-item list-group-item-action">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -72,7 +72,7 @@
                     </div>
                     {% else %}
                     <p class="text-muted mb-0">Você ainda não resolveu nenhum desafio.</p>
-                    <a href="{% url 'problem_list' %}" class="btn btn-primary mt-3">
+                    <a href="{% url 'challenge_list' %}" class="btn btn-primary mt-3">
                         Ver Desafios
                     </a>
                     {% endif %}
@@ -100,7 +100,7 @@
                                 {% for submission in recent_submissions %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'problem_detail' submission.problem.slug %}">
+                                        <a href="{% url 'challenge_detail' submission.problem.slug %}">
                                             {{ submission.problem.title }}
                                         </a>
                                     </td>

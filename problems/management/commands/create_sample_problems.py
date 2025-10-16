@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from problems.models import Problem, TestCase
+from problems.models import Challenge, TestCase
 import json
 
 
@@ -9,8 +9,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write('Criando desafios de exemplo...')
         
-        # Problema 1: Soma de Dois Números
-        problem1, created = Problem.objects.get_or_create(
+        # Desafio 1: Soma de Dois Números
+        challenge1, created = Challenge.objects.get_or_create(
             slug='soma-de-dois-numeros',
             defaults={
                 'title': 'Soma de Dois Números',
@@ -27,7 +27,7 @@ Escreva uma função que recebe dois parâmetros (a e b) e retorna a + b.''',
         
         if created:
             TestCase.objects.create(
-                problem=problem1,
+                challenge=challenge1,
                 input_data=json.dumps([2, 3]),
                 expected_output=json.dumps(5),
                 is_sample=True,
@@ -54,8 +54,8 @@ Escreva uma função que recebe dois parâmetros (a e b) e retorna a + b.''',
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Soma de Dois Números" criado'))
         
-        # Problema 2: Número Par ou Ímpar
-        problem2, created = Problem.objects.get_or_create(
+        # Desafio 2: Número Par ou Ímpar
+        challenge2, created = Challenge.objects.get_or_create(
             slug='numero-par-ou-impar',
             defaults={
                 'title': 'Número Par ou Ímpar',
@@ -73,41 +73,41 @@ Um número é par se for divisível por 2 (resto da divisão por 2 igual a 0).''
         
         if created:
             TestCase.objects.create(
-                problem=problem2,
+                challenge=challenge2,
                 input_data=json.dumps([4]),
                 expected_output=json.dumps(True),
                 is_sample=True,
                 description='4 é par'
             )
             TestCase.objects.create(
-                problem=problem2,
+                challenge=challenge2,
                 input_data=json.dumps([7]),
                 expected_output=json.dumps(False),
                 is_sample=True,
                 description='7 é ímpar'
             )
             TestCase.objects.create(
-                problem=problem2,
+                challenge=challenge2,
                 input_data=json.dumps([0]),
                 expected_output=json.dumps(True),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem2,
+                challenge=challenge2,
                 input_data=json.dumps([100]),
                 expected_output=json.dumps(True),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem2,
+                challenge=challenge2,
                 input_data=json.dumps([101]),
                 expected_output=json.dumps(False),
                 is_sample=False
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Número Par ou Ímpar" criado'))
         
-        # Problema 3: Inverter String
-        problem3, created = Problem.objects.get_or_create(
+        # Desafio 3: Inverter String
+        challenge3, created = Challenge.objects.get_or_create(
             slug='inverter-string',
             defaults={
                 'title': 'Inverter String',
@@ -125,35 +125,35 @@ Por exemplo, se a entrada for "hello", a saída deve ser "olleh".''',
         
         if created:
             TestCase.objects.create(
-                problem=problem3,
+                challenge=challenge3,
                 input_data=json.dumps(["hello"]),
                 expected_output=json.dumps("olleh"),
                 is_sample=True,
                 description='Inverter "hello"'
             )
             TestCase.objects.create(
-                problem=problem3,
+                challenge=challenge3,
                 input_data=json.dumps(["python"]),
                 expected_output=json.dumps("nohtyp"),
                 is_sample=True,
                 description='Inverter "python"'
             )
             TestCase.objects.create(
-                problem=problem3,
+                challenge=challenge3,
                 input_data=json.dumps(["a"]),
                 expected_output=json.dumps("a"),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem3,
+                challenge=challenge3,
                 input_data=json.dumps([""]),
                 expected_output=json.dumps(""),
                 is_sample=False
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Inverter String" criado'))
         
-        # Problema 4: Fatorial
-        problem4, created = Problem.objects.get_or_create(
+        # Desafio 4: Fatorial
+        challenge4, created = Challenge.objects.get_or_create(
             slug='fatorial',
             defaults={
                 'title': 'Calcular Fatorial',
@@ -174,35 +174,35 @@ Considere que 0! = 1''',
         
         if created:
             TestCase.objects.create(
-                problem=problem4,
+                challenge=challenge4,
                 input_data=json.dumps([5]),
                 expected_output=json.dumps(120),
                 is_sample=True,
                 description='5! = 120'
             )
             TestCase.objects.create(
-                problem=problem4,
+                challenge=challenge4,
                 input_data=json.dumps([0]),
                 expected_output=json.dumps(1),
                 is_sample=True,
                 description='0! = 1'
             )
             TestCase.objects.create(
-                problem=problem4,
+                challenge=challenge4,
                 input_data=json.dumps([1]),
                 expected_output=json.dumps(1),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem4,
+                challenge=challenge4,
                 input_data=json.dumps([10]),
                 expected_output=json.dumps(3628800),
                 is_sample=False
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Calcular Fatorial" criado'))
         
-        # Problema 5: Palíndromo
-        problem5, created = Problem.objects.get_or_create(
+        # Desafio 5: Palíndromo
+        challenge5, created = Challenge.objects.get_or_create(
             slug='palindromo',
             defaults={
                 'title': 'Verificar Palíndromo',
@@ -223,35 +223,35 @@ Ignore espaços e considere apenas letras minúsculas.''',
         
         if created:
             TestCase.objects.create(
-                problem=problem5,
+                challenge=challenge5,
                 input_data=json.dumps(["arara"]),
                 expected_output=json.dumps(True),
                 is_sample=True,
                 description='"arara" é palíndromo'
             )
             TestCase.objects.create(
-                problem=problem5,
+                challenge=challenge5,
                 input_data=json.dumps(["hello"]),
                 expected_output=json.dumps(False),
                 is_sample=True,
                 description='"hello" não é palíndromo'
             )
             TestCase.objects.create(
-                problem=problem5,
+                challenge=challenge5,
                 input_data=json.dumps(["a"]),
                 expected_output=json.dumps(True),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem5,
+                challenge=challenge5,
                 input_data=json.dumps(["ovo"]),
                 expected_output=json.dumps(True),
                 is_sample=False
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Verificar Palíndromo" criado'))
         
-        # Problema 6: Fibonacci
-        problem6, created = Problem.objects.get_or_create(
+        # Desafio 6: Fibonacci
+        challenge6, created = Challenge.objects.get_or_create(
             slug='fibonacci',
             defaults={
                 'title': 'Número de Fibonacci',
@@ -272,35 +272,35 @@ F(0) = 0, F(1) = 1, F(n) = F(n-1) + F(n-2) para n > 1''',
         
         if created:
             TestCase.objects.create(
-                problem=problem6,
+                challenge=challenge6,
                 input_data=json.dumps([0]),
                 expected_output=json.dumps(0),
                 is_sample=True,
                 description='F(0) = 0'
             )
             TestCase.objects.create(
-                problem=problem6,
+                challenge=challenge6,
                 input_data=json.dumps([5]),
                 expected_output=json.dumps(5),
                 is_sample=True,
                 description='F(5) = 5'
             )
             TestCase.objects.create(
-                problem=problem6,
+                challenge=challenge6,
                 input_data=json.dumps([10]),
                 expected_output=json.dumps(55),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem6,
+                challenge=challenge6,
                 input_data=json.dumps([15]),
                 expected_output=json.dumps(610),
                 is_sample=False
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Número de Fibonacci" criado'))
         
-        # Problema 7: Maior Elemento
-        problem7, created = Problem.objects.get_or_create(
+        # Desafio 7: Maior Elemento
+        challenge7, created = Challenge.objects.get_or_create(
             slug='maior-elemento-lista',
             defaults={
                 'title': 'Maior Elemento em uma Lista',
@@ -318,35 +318,35 @@ Por exemplo, para [3, 7, 2, 9, 1], o maior elemento é 9.''',
         
         if created:
             TestCase.objects.create(
-                problem=problem7,
+                challenge=challenge7,
                 input_data=json.dumps([[3, 7, 2, 9, 1]]),
                 expected_output=json.dumps(9),
                 is_sample=True,
                 description='Maior elemento de [3, 7, 2, 9, 1] é 9'
             )
             TestCase.objects.create(
-                problem=problem7,
+                challenge=challenge7,
                 input_data=json.dumps([[1, 2, 3, 4, 5]]),
                 expected_output=json.dumps(5),
                 is_sample=True,
                 description='Maior elemento de [1, 2, 3, 4, 5] é 5'
             )
             TestCase.objects.create(
-                problem=problem7,
+                challenge=challenge7,
                 input_data=json.dumps([[10]]),
                 expected_output=json.dumps(10),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem7,
+                challenge=challenge7,
                 input_data=json.dumps([[-5, -2, -10, -1]]),
                 expected_output=json.dumps(-1),
                 is_sample=False
             )
             self.stdout.write(self.style.SUCCESS('✓ Desafio "Maior Elemento em uma Lista" criado'))
         
-        # Problema 8: Ordenar Lista (Hard)
-        problem8, created = Problem.objects.get_or_create(
+        # Desafio 8: Ordenar Lista (Hard)
+        challenge8, created = Challenge.objects.get_or_create(
             slug='ordenar-lista-sem-sort',
             defaults={
                 'title': 'Ordenar Lista (Sem usar sort)',
@@ -367,27 +367,27 @@ Você pode usar algoritmos como Bubble Sort, Insertion Sort, Selection Sort, etc
         
         if created:
             TestCase.objects.create(
-                problem=problem8,
+                challenge=challenge8,
                 input_data=json.dumps([[5, 2, 8, 1, 9]]),
                 expected_output=json.dumps([1, 2, 5, 8, 9]),
                 is_sample=True,
                 description='Ordenar [5, 2, 8, 1, 9]'
             )
             TestCase.objects.create(
-                problem=problem8,
+                challenge=challenge8,
                 input_data=json.dumps([[3, 3, 1, 2, 1]]),
                 expected_output=json.dumps([1, 1, 2, 3, 3]),
                 is_sample=True,
                 description='Ordenar [3, 3, 1, 2, 1]'
             )
             TestCase.objects.create(
-                problem=problem8,
+                challenge=challenge8,
                 input_data=json.dumps([[1]]),
                 expected_output=json.dumps([1]),
                 is_sample=False
             )
             TestCase.objects.create(
-                problem=problem8,
+                challenge=challenge8,
                 input_data=json.dumps([[-5, 10, -3, 0, 7]]),
                 expected_output=json.dumps([-5, -3, 0, 7, 10]),
                 is_sample=False

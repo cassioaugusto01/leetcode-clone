@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from problems.models import Problem, TestCase as ProblemTestCase, Submission
+from problems.models import Challenge, TestCase as ChallengeTestCase, Submission
 import json
 
 
@@ -24,7 +24,7 @@ class HomeViewTest(TestCase):
     def test_home_view_context(self):
         """Testa se o contexto contém as variáveis corretas"""
         response = self.client.get(reverse('home'))
-        self.assertIn('problems_count', response.context)
+        self.assertIn('challenges_count', response.context)
         self.assertIn('users_count', response.context)
         self.assertIn('submissions_count', response.context)
 
@@ -99,74 +99,74 @@ class LoginViewTest(TestCase):
         self.assertContains(response, 'Usuário ou senha inválidos')
 
 
-class ProblemListViewTest(TestCase):
-    """Testes para a view de lista de problemas"""
+class ChallengeListViewTest(TestCase):
+    """Testes para a view de lista de desafios"""
     
     def setUp(self):
         self.client = Client()
-        Problem.objects.create(
-            title='Problema 1',
-            slug='problema-1',
+        Challenge.objects.create(
+            title='Desafio 1',
+            slug='desafio-1',
             description='Descrição 1',
             difficulty='easy'
         )
-        Problem.objects.create(
-            title='Problema 2',
-            slug='problema-2',
+        Challenge.objects.create(
+            title='Desafio 2',
+            slug='desafio-2',
             description='Descrição 2',
             difficulty='hard'
         )
     
-    def test_problem_list_view(self):
-        """Testa listagem de problemas"""
-        response = self.client.get(reverse('problem_list'))
+    def test_challenge_list_view(self):
+        """Testa listagem de desafios"""
+        response = self.client.get(reverse('challenge_list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'problems/problem_list.html')
-        self.assertEqual(len(response.context['problems']), 2)
+        self.assertEqual(len(response.context['challenges']), 2)
     
-    def test_problem_list_filter_difficulty(self):
+    def test_challenge_list_filter_difficulty(self):
         """Testa filtro por dificuldade"""
-        response = self.client.get(reverse('problem_list') + '?difficulty=easy')
-        self.assertEqual(len(response.context['problems']), 1)
-        self.assertEqual(response.context['problems'][0].difficulty, 'easy')
+        response = self.client.get(reverse('challenge_list') + '?difficulty=easy')
+        self.assertEqual(len(response.context['challenges']), 1)
+        self.assertEqual(response.context['challenges'][0].difficulty, 'easy')
     
-    def test_problem_list_search(self):
+    def test_challenge_list_search(self):
         """Testa busca por título"""
-        response = self.client.get(reverse('problem_list') + '?search=Problema 1')
-        self.assertEqual(len(response.context['problems']), 1)
+        response = self.client.get(reverse('challenge_list') + '?search=Desafio 1')
+        self.assertEqual(len(response.context['challenges']), 1)
 
 
-class ProblemDetailViewTest(TestCase):
-    """Testes para a view de detalhe do problema"""
+class ChallengeDetailViewTest(TestCase):
+    """Testes para a view de detalhe do desafio"""
     
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
-        self.problem = Problem.objects.create(
+        self.challenge = Challenge.objects.create(
             title='Teste',
             slug='teste',
             description='Descrição do teste',
             difficulty='easy',
             starter_code='def solution():\n    pass'
         )
-        ProblemTestCase.objects.create(
-            problem=self.problem,
+        ChallengeTestCase.objects.create(
+            challenge=self.challenge,
             input_data='[1, 2]',
             expected_output='3',
             is_sample=True
         )
     
-    def test_problem_detail_view(self):
-        """Testa visualização de problema"""
-        response = self.client.get(reverse('problem_detail', args=['teste']))
+    def test_challenge_detail_view(self):
+        """Testa visualização de desafio"""
+        response = self.client.get(reverse('challenge_detail', args=['teste']))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'problems/problem_detail.html')
-        self.assertEqual(response.context['problem'], self.problem)
+        self.assertEqual(response.context['challenge'], self.challenge)
     
-    def test_problem_detail_with_authenticated_user(self):
+    def test_challenge_detail_with_authenticated_user(self):
         """Testa com usuário autenticado"""
         self.client.login(username='testuser', password='12345')
-        response = self.client.get(reverse('problem_detail', args=['teste']))
+        response = self.client.get(reverse('challenge_detail', args=['teste']))
         self.assertIn('user_submissions', response.context)
         self.assertIn('user_solved', response.context)
 
@@ -177,15 +177,15 @@ class RunCodeViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
-        self.problem = Problem.objects.create(
+        self.challenge = Challenge.objects.create(
             title='Soma',
             slug='soma',
             description='Somar',
             difficulty='easy',
             function_name='solution'
         )
-        ProblemTestCase.objects.create(
-            problem=self.problem,
+        ChallengeTestCase.objects.create(
+            challenge=self.challenge,
             input_data='[2, 3]',
             expected_output='5',
             is_sample=True
@@ -229,15 +229,15 @@ class SubmitCodeViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
-        self.problem = Problem.objects.create(
+        self.challenge = Challenge.objects.create(
             title='Soma',
             slug='soma',
             description='Somar',
             difficulty='easy',
             function_name='solution'
         )
-        ProblemTestCase.objects.create(
-            problem=self.problem,
+        ChallengeTestCase.objects.create(
+            challenge=self.challenge,
             input_data='[2, 3]',
             expected_output='5',
             is_sample=False
@@ -260,7 +260,7 @@ class SubmitCodeViewTest(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(Submission.objects.filter(user=self.user, problem=self.problem).exists())
+        self.assertTrue(Submission.objects.filter(user=self.user, challenge=self.challenge).exists())
     
     def test_submit_code_updates_profile(self):
         """Testa se atualiza perfil do usuário"""
@@ -301,5 +301,5 @@ class UserProfileViewTest(TestCase):
         self.assertTemplateUsed(response, 'problems/profile.html')
         self.assertIn('profile', response.context)
         self.assertIn('recent_submissions', response.context)
-        self.assertIn('solved_problems', response.context)
+        self.assertIn('solved_challenges', response.context)
 
